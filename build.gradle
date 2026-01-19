@@ -1,0 +1,66 @@
+plugins {
+    id 'java'
+    id 'com.vanniktech.maven.publish' version '0.35.0'
+}
+
+group = 'kr.zzik2'
+version = project.version
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+javadoc.options.encoding = 'UTF-8'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
+mavenPublishing {
+    publishToMavenCentral(true)
+    signAllPublications()
+
+    coordinates(group, "zreflex", version as String)
+
+    pom {
+        name = "ZReflex"
+        description = ""
+        inceptionYear = "2026"
+        url = "https://github.com/zzik2/ZReflex"
+
+        licenses {
+            license {
+                name = "The MIT License"
+                url = "http://opensource.org/licenses/MIT"
+            }
+        }
+
+        developers {
+            developer {
+                id = "zzik2"
+                name = "zzik2"
+                url = "https://github.com/zzik2"
+            }
+        }
+
+        scm {
+            url = "https://github.com/zzik2/ZReflex"
+            connection = "scm:git:git://github.com/zzik2/ZReflex.git"
+            developerConnection = "scm:git:ssh://git@github.com/zzik2/ZReflex.git"
+        }
+    }
+}
