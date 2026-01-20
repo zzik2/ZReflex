@@ -15,6 +15,10 @@ repositories {
 }
 
 dependencies {
+    compileOnly("org.ow2.asm:asm:9.9.1")
+    compileOnly("org.ow2.asm:asm-tree:9.9.1")
+    compileOnly("net.fabricmc:sponge-mixin:0.17.0+mixin.0.8.7")
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
