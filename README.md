@@ -1,6 +1,6 @@
 # ZReflex
 
-ZReflex is a small Java utility library for advanced reflection and access-modifier tweaks in mixin-based environments. It provides:
+ZReflex is a small Java utility library for advanced reflection and access-modifier tweaks in mixin-based environments for minecraft. It provides:
 
 - A `ZReflectionTool` utility with convenient helpers to read/write fields, invoke methods, and instantiate classes (including private members) with assignable type resolution.
 - A `@ModifyAccess` annotation plus a `ModifyAccessTransformer` mixin plugin that can adjust field/method access modifiers after mixin application.

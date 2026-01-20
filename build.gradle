@@ -42,7 +42,7 @@ mavenPublishing {
 
     pom {
         name = "ZReflex"
-        description = ""
+        description = "ZReflex is a small Java utility library for advanced reflection and access-modifier tweaks in mixin-based environments for minecraft."
         inceptionYear = "2026"
         url = "https://github.com/zzik2/ZReflex"
 
