@@ -21,7 +21,7 @@ repositories {
 }
 
 dependencies {
-    implementation "kr.zzik2:zreflex:0.0.1"
+    implementation "kr.zzik2:zreflex:0.0.3"
 }
 ```
 
@@ -82,6 +82,21 @@ ZEnumTool.addConstants(Color.class, List.of(color1, color2, color3));
 ```java
 @ModifyAccess(access = { Opcodes.ACC_PUBLIC }, removeFinal = true)
 @Shadow @Final private int someField;
+```
+
+### Mixin name changes
+
+You can rename methods or fields at runtime using `@ModifyName`. This is useful for handling obfuscated names or resolving conflicts.
+
+```java
+// Rename 'oldName' to 'newName'
+// By default, it attempts to remap 'newName' using the current environment's remapper.
+@ModifyName("newName")
+@Shadow private void oldName() {}
+
+// Disable remapping if you want to use the exact name provided
+@ModifyName(value = "myCustomName", remap = false)
+@Shadow private void oldName() {}
 ```
 
 ## Requirements
