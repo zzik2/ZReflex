@@ -121,6 +121,28 @@ public final class ZReflectionTool {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> T createProxy(Class<T> interfaceType, InvocationHandler handler) {
+        return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class<?>[] { interfaceType }, handler);
+    }
+
+    public static Class<?> findDeclaredClass(Class<?> owner, String simpleName) {
+        for (Class<?> declared : owner.getDeclaredClasses()) {
+            if (declared.getSimpleName().equals(simpleName)) {
+                return declared;
+            }
+        }
+        throw new ReflectionException("Class not found: " + simpleName + " in " + owner.getName());
+    }
+
+    public static Optional<Class<?>> findDeclaredClassOptional(Class<?> owner, String simpleName) {
+        try {
+            return Optional.of(findDeclaredClass(owner, simpleName));
+        } catch (ReflectionException e) {
+            return Optional.empty();
+        }
+    }
+
     public static Field findField(Class<?> clazz, String fieldName) {
         Class<?> current = clazz;
         while (current != null) {

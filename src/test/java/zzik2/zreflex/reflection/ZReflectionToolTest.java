@@ -751,4 +751,51 @@ class ZReflectionToolTest {
         private PrivateConstructorClass(String value) {
         }
     }
+
+    @Nested
+    @DisplayName("Proxy and Inner Class Tests")
+    class ProxyAndInnerClassTests {
+
+        @Test
+        @DisplayName("Find declared inner class")
+        void findDeclaredClass() {
+            Class<?> innerClass = ZReflectionTool.findDeclaredClass(ClassWithPrivateInner.class, "PrivateInner");
+            assertNotNull(innerClass);
+            assertEquals("PrivateInner", innerClass.getSimpleName());
+        }
+
+        @Test
+        @DisplayName("Find declared inner class Optional")
+        void findDeclaredClassOptional() {
+            Optional<Class<?>> innerClass = ZReflectionTool.findDeclaredClassOptional(ClassWithPrivateInner.class,
+                    "PrivateInner");
+            assertTrue(innerClass.isPresent());
+        }
+
+        @Test
+        @DisplayName("Create proxy for public interface")
+        void createProxyPublicInterface() {
+            TestInterface proxy = ZReflectionTool.createProxy(TestInterface.class, (p, method, args) -> "proxy");
+            assertEquals("proxy", proxy.testMethod());
+        }
+
+        @Test
+        @DisplayName("Create proxy for private interface")
+        void createProxyPrivateInterface() {
+            Class<?> privateInterface = ZReflectionTool.findDeclaredClass(ClassWithPrivateInner.class, "PrivateInner");
+            Object proxy = ZReflectionTool.createProxy(privateInterface, (p, method, args) -> "privateProxy");
+            String result = ZReflectionTool.invokeMethod(proxy, "privateMethod");
+            assertEquals("privateProxy", result);
+        }
+    }
+
+    interface TestInterface {
+        String testMethod();
+    }
+
+    static class ClassWithPrivateInner {
+        private interface PrivateInner {
+            String privateMethod();
+        }
+    }
 }
