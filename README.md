@@ -21,7 +21,7 @@ repositories {
 }
 
 dependencies {
-    implementation "kr.zzik2:zreflex:0.0.3"
+    implementation "kr.zzik2:zreflex:0.0.5"
 }
 ```
 
@@ -101,6 +101,6 @@ You can rename methods or fields at runtime using `@ModifyName`. This is useful 
 
 ## Requirements
 
-- Java 11+
+- Java 16+
 
 ---
