@@ -4,6 +4,7 @@ import zzik2.zreflex.internal.UnsafeAccess;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -21,10 +22,10 @@ import java.util.List;
 public final class ZEnumTool {
 
     private static final String[] ENUM_VALUES_FIELD_NAMES = { "$VALUES", "ENUM$VALUES" };
-    private static final long[] ENUM_CACHE_FIELD_OFFSETS;
+    private static final VarHandle[] ENUM_CACHE_VAR_HANDLES;
 
     static {
-        ENUM_CACHE_FIELD_OFFSETS = discoverEnumCacheOffsets();
+        ENUM_CACHE_VAR_HANDLES = discoverEnumCacheVarHandles();
     }
 
     private ZEnumTool() {
@@ -35,8 +36,7 @@ public final class ZEnumTool {
         return addConstant(enumType, constantName, new Class<?>[0]);
     }
 
-    public static <E extends Enum<E>> E addConstant(Class<E> enumType, String constantName, Class<?>[] parameterTypes,
-            Object... constructorArgs) {
+    public static <E extends Enum<E>> E addConstant(Class<E> enumType, String constantName, Class<?>[] parameterTypes, Object... constructorArgs) {
         validateEnumType(enumType);
         validateConstantName(constantName);
         UnsafeAccess.initializeClass(enumType);
@@ -70,8 +70,7 @@ public final class ZEnumTool {
         return createInstance(enumType, name, ordinal, new Class<?>[0]);
     }
 
-    public static <E extends Enum<E>> E createInstance(Class<E> enumType, String name, int ordinal,
-            Class<?>[] parameterTypes, Object... constructorArgs) {
+    public static <E extends Enum<E>> E createInstance(Class<E> enumType, String name, int ordinal, Class<?>[] parameterTypes, Object... constructorArgs) {
         validateEnumType(enumType);
         UnsafeAccess.initializeClass(enumType);
 
@@ -92,16 +91,12 @@ public final class ZEnumTool {
     @SuppressWarnings("unchecked")
     private static <E extends Enum<E>> E[] getEnumValuesArray(Class<E> enumType) {
         Field valuesField = findValuesField(enumType);
-        Object fieldBase = UnsafeAccess.getStaticFieldBase(valuesField);
-        long fieldOffset = UnsafeAccess.getStaticFieldOffset(valuesField);
-        return (E[]) UnsafeAccess.getObjectField(fieldBase, fieldOffset);
+        return (E[]) UnsafeAccess.getStaticFieldValue(valuesField);
     }
 
     private static <E extends Enum<E>> void replaceEnumValuesArray(Class<E> enumType, E[] newValues) {
         Field valuesField = findValuesField(enumType);
-        Object fieldBase = UnsafeAccess.getStaticFieldBase(valuesField);
-        long fieldOffset = UnsafeAccess.getStaticFieldOffset(valuesField);
-        UnsafeAccess.putObjectField(fieldBase, fieldOffset, newValues);
+        UnsafeAccess.setStaticFieldValue(valuesField, newValues);
     }
 
     private static <E extends Enum<E>> Field findValuesField(Class<E> enumType) {
@@ -112,8 +107,7 @@ public final class ZEnumTool {
             }
         }
         for (Field field : enumType.getDeclaredFields()) {
-            if (field.getType().isArray() && field.getType().getComponentType() == enumType
-                    && java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+            if (field.getType().isArray() && field.getType().getComponentType() == enumType && java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
                 return field;
             }
         }
@@ -130,8 +124,7 @@ public final class ZEnumTool {
 
     @SuppressWarnings("unchecked")
     private static <E extends Enum<E>> E[] expandArray(E[] original, Collection<E> newElements) {
-        E[] expanded = (E[]) Array.newInstance(original.getClass().getComponentType(),
-                original.length + newElements.size());
+        E[] expanded = (E[]) Array.newInstance(original.getClass().getComponentType(), original.length + newElements.size());
         System.arraycopy(original, 0, expanded, 0, original.length);
         int index = original.length;
         for (E element : newElements) {
@@ -156,32 +149,24 @@ public final class ZEnumTool {
         return args;
     }
 
-    private static long[] discoverEnumCacheOffsets() {
+    private static VarHandle[] discoverEnumCacheVarHandles() {
         String[] cacheFieldCandidates = { "enumConstantDirectory", "enumConstants", "enumVars" };
-        List<Long> foundOffsets = new ArrayList<>();
+        List<VarHandle> handles = new ArrayList<>();
 
         for (String fieldName : cacheFieldCandidates) {
             try {
                 Field cacheField = Class.class.getDeclaredField(fieldName);
-                foundOffsets.add(UnsafeAccess.getInstanceFieldOffset(cacheField));
+                handles.add(UnsafeAccess.unreflectVarHandle(cacheField));
             } catch (NoSuchFieldException ignored) {
             }
         }
 
-        if (foundOffsets.isEmpty()) {
-            return new long[0];
-        }
-
-        long[] offsets = new long[foundOffsets.size()];
-        for (int i = 0; i < offsets.length; i++) {
-            offsets[i] = foundOffsets.get(i);
-        }
-        return offsets;
+        return handles.toArray(new VarHandle[0]);
     }
 
     private static void invalidateEnumCache(Class<?> enumType) {
-        for (long offset : ENUM_CACHE_FIELD_OFFSETS) {
-            UnsafeAccess.putObjectFieldVolatile(enumType, offset, null);
+        for (VarHandle handle : ENUM_CACHE_VAR_HANDLES) {
+            handle.setVolatile(enumType, null);
         }
     }
 

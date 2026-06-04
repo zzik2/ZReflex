@@ -100,8 +100,7 @@ public final class ZReflectionTool {
 
     public static <T> T newInstance(Class<T> clazz, Class<?>[] paramTypes, Object... args) {
         try {
-            Class<?>[] resolvedTypes = paramTypes != null ? paramTypes
-                    : Arrays.stream(args).map(arg -> arg != null ? arg.getClass() : null).toArray(Class<?>[]::new);
+            Class<?>[] resolvedTypes = paramTypes != null ? paramTypes : Arrays.stream(args).map(arg -> arg != null ? arg.getClass() : null).toArray(Class<?>[]::new);
             Constructor<T> constructor = findConstructor(clazz, resolvedTypes);
             ensureAccessible(constructor, clazz.getName());
             return constructor.newInstance(args);

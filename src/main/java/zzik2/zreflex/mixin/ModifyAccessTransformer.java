@@ -147,8 +147,7 @@ public class ModifyAccessTransformer implements IMixinConfigPlugin {
         return null;
     }
 
-    private ModifyAccessInfo getModifyAccessInfo(List<AnnotationNode> visibleAnnotations,
-            List<AnnotationNode> invisibleAnnotations) {
+    private ModifyAccessInfo getModifyAccessInfo(List<AnnotationNode> visibleAnnotations, List<AnnotationNode> invisibleAnnotations) {
         ModifyAccessInfo info = findAnnotation(visibleAnnotations);
         if (info != null)
             return info;
